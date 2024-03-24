@@ -24,12 +24,6 @@ ESP8266WebServer server(80);
     const int garageClosedPin = 13;
     const int garageOpenedPin = 15;
 
-//define sound velocity in cm/uS
-#define SOUND_VELOCITY 0.034
-#define CM_TO_INCH 0.393701
-
-long duration;
-float distanceCm;
 int garageClosed = 0;
 int garageOpened = 0;
 
