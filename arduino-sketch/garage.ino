@@ -5,16 +5,33 @@
 #include <ESP8266mDNS.h>
 
 #ifndef STASSID
-  #define HOSTNAME            "Garage"
-  #define STASSID             "SSID"
-  #define STAPSK              "PASS"
+  #define HOSTNAME            "GarageESP"
+  #define STASSID             "Your SSID"
+  #define STAPSK              "Your PASSWORD"
+  #define REGISTER_ME         "192.168.178.88:4711"
 #endif
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
 ESP8266WebServer server(80);
 
-const int ledPin = LED_BUILTIN;
+// Pins
+  // BuiltIn
+  const int ledPin = LED_BUILTIN;
+  // Relay
+    const int relayPin = 5;
+  // Reed Garage Closed
+    const int garageClosedPin = 13;
+    const int garageOpenedPin = 15;
+
+//define sound velocity in cm/uS
+#define SOUND_VELOCITY 0.034
+#define CM_TO_INCH 0.393701
+
+long duration;
+float distanceCm;
+int garageClosed = 0;
+int garageOpened = 0;
 
 void handleNotFound() {
   digitalWrite(ledPin, 0);
@@ -33,27 +50,36 @@ void handleNotFound() {
 
 void handleRoot() {
   digitalWrite(ledPin, 0);
-  int garageState = 2;
-  if (garageClosed == 1) {
-    garageState = 0;
-  }
-  if (garageOpened == 1) {
-    garageState = 1;
-  }
-
   String result = String("{");
-  result += "\"distance\":" + String(distanceCm) + ",";
   result += "\"garageClosed\":" + String(garageClosed) + ",";
-  result += "\"garageOpened\":" + String(garageOpened) + ",";
-  result += "\"garageState\":" + String(garageState);
+  result += "\"garageOpened\":" + String(garageOpened);
   result += "}";
   server.send(200, "application/json", result.c_str());
   digitalWrite(ledPin, 1);
 }
 
+void handleRelay() {
+  Serial.println("Handling Relay Request");
+  JSONVar jsonInput = JSON.parse(server.arg("plain"));
+
+  // JSON.typeof(jsonVar) can be used to get the type of the variable
+  if (JSON.typeof(jsonInput) == "undefined") {
+    Serial.println("Parsing JSON input failed!");
+    server.send(200, "application/json", "{\"error\":2}");
+    return;
+  }
+  
+  if (jsonInput.hasOwnProperty("toggle") && (bool)jsonInput["toggle"]) {
+    digitalWrite(relayPin, LOW);
+    delay(500);    
+    digitalWrite(relayPin, HIGH);
+    server.send(200, "application/json", "{\"error\":0}");
+    return;
+  }
+  server.send(200, "application/json", "{\"error\":1}");
+}
+
 void setup() {
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
   pinMode(ledPin, OUTPUT);
   pinMode(relayPin, OUTPUT);
   pinMode(garageClosedPin, INPUT);
@@ -95,22 +121,11 @@ void setup() {
   digitalWrite(ledPin, HIGH);
 }
 
-void loop() {
-  // compute distance in CM from ultraschall
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);  
-  duration = pulseIn(echoPin, HIGH);
-  distanceCm = duration * SOUND_VELOCITY/2;
-  
+void loop() {  
   // Reed sensor readings of garage gate (closed or opened)
   garageClosed = digitalRead(garageClosedPin);
   garageOpened = digitalRead(garageOpenedPin);
   
   // handle client requests
   server.handleClient();
-  // register iot device
-  //registerMe.Loop();
 }
