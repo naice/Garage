@@ -1,0 +1,22 @@
+{
+  "pluginAlias": "JensGarageDoor",
+  "pluginType": "accessory",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "doorDisplayName": {
+        "title": "Display Name",
+        "type": "string",
+        "required": true,
+        "default": "Garage"
+      },
+      "doorNodeUrl": {
+        "title": "NodeMCU Url",
+        "type": "string",
+        "required": true,
+        "default": "Garage"
+      }
+    }
+  }
+}
