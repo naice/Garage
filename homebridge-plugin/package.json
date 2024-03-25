@@ -1,7 +1,7 @@
 {
   "displayName": "JensGarageDoor",
   "name": "homebridge-jens-garage-door",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Opens/closes a garage door.",
   "license": "Apache-2.0",
   "repository": {

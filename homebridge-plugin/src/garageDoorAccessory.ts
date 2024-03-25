@@ -8,10 +8,6 @@ import {
 } from 'homebridge';
 import * as axios from 'axios';
 import { ACCESSORY_NAME } from './settings';
-
-const http = new axios.Axios();
-
-
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
@@ -57,6 +53,7 @@ type GarageDoorConfig = {
 } | AccessoryConfig;
 
 export class GarageDoorAccessory implements AccessoryPlugin {
+  private http: axios.Axios;
   private toggleUrl: string;
   private service: Service;
   private informationService: Service;
@@ -81,6 +78,7 @@ export class GarageDoorAccessory implements AccessoryPlugin {
     private api: API,
   ) {
     const { Characteristic } = api.hap;
+    this.http = new axios.Axios();
     this.toggleUrl = config.doorNodeUrl + '/relay';
     this.informationService = new api.hap.Service.AccessoryInformation();
     this.service = new api.hap.Service.GarageDoorOpener(
@@ -97,16 +95,16 @@ export class GarageDoorAccessory implements AccessoryPlugin {
       .onSet(this.onSet.bind(this))
       .onGet(this.onGet.bind(this));
 
-    log.debug(`Initialized accessory ${config.name}`);
+    log.debug(`Initialized accessory ${config.name} test123`);
   }
 
   getServices(): Service[] {
-    return [ this.service ];
+    return [ this.informationService, this.service ];
   }
 
   async onSet(value: CharacteristicValue) {
     // implement your own code to turn your device on/off
-    const { state, toggleUrl, log, api, service } = this;
+    const { state, toggleUrl, log, api, service, http } = this;
     const { Characteristic } = api.hap;
     state.targetDoorState = value;
     log.info('Setting target door state ->', state.targetAsText());
@@ -127,9 +125,11 @@ export class GarageDoorAccessory implements AccessoryPlugin {
   }
 
   async onGet(): Promise<CharacteristicValue> {
-    const { state, api } = this;
+    const { state, api, config, log, http } = this;
     const { Characteristic } = api.hap;
     const { targetDoorState, currentDoorState } = state;
+    const nodeUrl = config.doorNodeUrl;
+    log.debug('Node Url', nodeUrl);
     const result = await http.get<GarageDoorResult>(this.config.doorNodeUrl);
     if (result.status !== 200) {
       throw new this.api.hap.HapStatusError(this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
