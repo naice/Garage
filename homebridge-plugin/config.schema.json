@@ -14,9 +14,24 @@
 			},
       "doorNodeUrl": {
         "title": "NodeMCU Url",
+				"description": "Url to the node MCU, must not end with slash (/) ",
         "type": "string",
         "required": true,
         "default": "http://"
+      },
+      "refreshTimeoutInSeconds": {
+        "title": "Refresh Timeout",
+				"description": "Timeout in seconds to scan for State changes on the Garage door.",
+        "type": "number",
+        "required": true,
+        "default": "2"
+      },
+      "maximumDurationInSeconds": {
+        "title": "Maximum Duration",
+				"description": "When a target state change for the door occurs (open / close) this is the total amount of time in seconds for the accessory to wait to reach the target state.",
+        "type": "number",
+        "required": true,
+        "default": "120"
       }
     }
   }

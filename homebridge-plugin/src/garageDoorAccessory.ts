@@ -50,10 +50,14 @@ interface GarageDoorResult {
 type GarageDoorConfig = {
   doorNodeUrl: string;
   name: string;
+  refreshTimeoutInSeconds: number;
+  maximumDurationInSeconds: number;
 } | AccessoryConfig;
 
 export class GarageDoorAccessory implements AccessoryPlugin {
   private http: AxiosInstance;
+  private timer?: NodeJS.Timer;
+  private timerLaunch = 0;
   private toggleUrl: string;
   private service: Service;
   private informationService: Service;
@@ -95,7 +99,7 @@ export class GarageDoorAccessory implements AccessoryPlugin {
       .onSet(this.onSet.bind(this))
       .onGet(this.onGet.bind(this));
 
-    log.debug(`Initialized accessory ${config.name} test123`);
+    log.debug(`Initialized accessory ${config.name} with config`, config);
   }
 
   getServices(): Service[] {
@@ -122,6 +126,43 @@ export class GarageDoorAccessory implements AccessoryPlugin {
 
     service.getCharacteristic(Characteristic.TargetDoorState)
       .updateValue(value);
+
+    this.startStateTimer();
+  }
+
+  startStateTimer(): void {
+    const { config, state, log } = this;
+    if (this.timer !== undefined) {
+      clearInterval(this.timer);
+    }
+    this.timerLaunch = new Date().getTime();
+    this.timer = setInterval(async () => {
+      const now = new Date().getTime();
+      const runtimeInSeconds = (now - this.timerLaunch) / 1000;
+      if (runtimeInSeconds > config.maximumDurationInSeconds) {
+        log.debug(
+          `Target state not reached yet, aborting. Target: ${this.getStateLog(state.targetDoorState)}, ` +
+          `Current: ${this.getStateLog(state.targetDoorState)}`);
+        clearInterval(this.timer);
+        return;
+      }
+
+      try {
+        await this.onGet();
+      } catch (error) {
+        log.debug('Timer state update failed.', error);
+      }
+
+      if (state.currentDoorState === state.targetDoorState) {
+        log.debug(
+          `Target state reached. ${this.getStateLog(state.targetDoorState)}`);
+        clearInterval(this.timer);
+        return;
+      }
+      log.debug(
+        `Target state not reached yet. Target: ${this.getStateLog(state.targetDoorState)}, ` +
+        `Current: ${this.getStateLog(state.targetDoorState)}`);
+    }, config.refreshTimeoutInSeconds * 1000);
   }
 
   async onGet(): Promise<CharacteristicValue> {
