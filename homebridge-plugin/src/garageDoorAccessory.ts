@@ -6,7 +6,7 @@ import {
   AccessoryPlugin,
   AccessoryConfig,
 } from 'homebridge';
-import * as axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { ACCESSORY_NAME } from './settings';
 /**
  * Platform Accessory
@@ -53,7 +53,7 @@ type GarageDoorConfig = {
 } | AccessoryConfig;
 
 export class GarageDoorAccessory implements AccessoryPlugin {
-  private http: axios.Axios;
+  private http: AxiosInstance;
   private toggleUrl: string;
   private service: Service;
   private informationService: Service;
@@ -78,7 +78,7 @@ export class GarageDoorAccessory implements AccessoryPlugin {
     private api: API,
   ) {
     const { Characteristic } = api.hap;
-    this.http = new axios.Axios();
+    this.http = axios.create();
     this.toggleUrl = config.doorNodeUrl + '/relay';
     this.informationService = new api.hap.Service.AccessoryInformation();
     this.service = new api.hap.Service.GarageDoorOpener(
