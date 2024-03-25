@@ -5,17 +5,18 @@
   "schema": {
     "type": "object",
     "properties": {
-      "doorDisplayName": {
-        "title": "Display Name",
-        "type": "string",
-        "required": true,
-        "default": "Garage"
-      },
+			"name": {
+				"title": "Name",
+				"description": "Name of the accessory as it will appear in Apple Home App",
+				"type": "string",
+				"default": "Garage",
+				"required": true
+			},
       "doorNodeUrl": {
         "title": "NodeMCU Url",
         "type": "string",
         "required": true,
-        "default": "Garage"
+        "default": "http://"
       }
     }
   }

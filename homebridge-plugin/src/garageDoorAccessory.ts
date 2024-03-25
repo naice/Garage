@@ -53,7 +53,7 @@ interface GarageDoorResult {
 
 type GarageDoorConfig = {
   doorNodeUrl: string;
-  doorDisplayName: string;
+  name: string;
 } | AccessoryConfig;
 
 export class GarageDoorAccessory implements AccessoryPlugin {
@@ -84,7 +84,7 @@ export class GarageDoorAccessory implements AccessoryPlugin {
     this.toggleUrl = config.doorNodeUrl + '/relay';
     this.informationService = new api.hap.Service.AccessoryInformation();
     this.service = new api.hap.Service.GarageDoorOpener(
-      config.doorDisplayName,
+      config.name,
     );
     // set accessory information
     this.informationService
@@ -96,6 +96,8 @@ export class GarageDoorAccessory implements AccessoryPlugin {
     this.service.getCharacteristic(Characteristic.TargetDoorState)
       .onSet(this.onSet.bind(this))
       .onGet(this.onGet.bind(this));
+
+    log.debug(`Initialized accessory ${config.name}`);
   }
 
   getServices(): Service[] {
