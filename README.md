@@ -25,13 +25,10 @@ Automates virtually every garage door. Currently running with a <a href="https:/
 _The links above are affiliate links, use them if you want to support me._
 
 ### Wifi
-Configure your wifi in this section of the <a href="./arduino-sketch/garage.ino">garage.ino</a>
+Configure your wifi in the <a href="./arduino-sketch/arduino_secrets.h">arduino_secrets.h</a>
 ```c++
-#ifndef STASSID
-  #define HOSTNAME            "GarageESP"
-  #define STASSID             "Your SSID"
-  #define STAPSK              "Your PASSWORD"
-#endif
+#define SECRET_SSID "your wifi ssid"
+#define SECRET_PASS "your wifi password"
 ```
 
 ### Pins
@@ -45,7 +42,6 @@ Configure your pins according to your wiring for the relay and the two reed sens
 ```
 
 ### Wiring
-
 Connect the reed sensors to the desired `garageClosedPin` / `garageOpenedPin` pins, also connect the `relayPin` to the relay. For the <a href="https://www.hornbach.de/p/garagentorantrieb-c-800-fuer-max-10-7-m-torflaeche-inkl-2-handsender-und-innentaster/6773389/">C-800</a> we need to connect GND and PB to trigger a door open / close event. Connect GND and PB of the C-800 to the relay port. The C-800 also has a 12v port, I used that to power the ESP/Arduino, as max. VIN is 21v, please refer to your board and garage door motor.
 
 TODO: FRITZING HERE
