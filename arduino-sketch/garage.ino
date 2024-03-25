@@ -59,7 +59,7 @@ void handleRelay() {
   // JSON.typeof(jsonVar) can be used to get the type of the variable
   if (JSON.typeof(jsonInput) == "undefined") {
     Serial.println("Parsing JSON input failed!");
-    server.send(200, "application/json", "{\"error\":2}");
+    server.send(500, "application/json", "{\"error\":2}");
     return;
   }
   
@@ -70,7 +70,7 @@ void handleRelay() {
     server.send(200, "application/json", "{\"error\":0}");
     return;
   }
-  server.send(200, "application/json", "{\"error\":1}");
+  server.send(404, "application/json", "{\"error\":1}");
 }
 
 void setup() {
