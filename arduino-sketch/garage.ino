@@ -8,7 +8,6 @@
   #define HOSTNAME            "GarageESP"
   #define STASSID             "Your SSID"
   #define STAPSK              "Your PASSWORD"
-  #define REGISTER_ME         "192.168.178.88:4711"
 #endif
 const char* ssid = STASSID;
 const char* password = STAPSK;
@@ -16,7 +15,7 @@ const char* password = STAPSK;
 ESP8266WebServer server(80);
 
 // Pins
-  // BuiltIn
+  // BuiltIn LED
   const int ledPin = LED_BUILTIN;
   // Relay
     const int relayPin = 5;

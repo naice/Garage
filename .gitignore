@@ -122,3 +122,4 @@ dist
 # project specific
 .vscode/
 arduino-sketch/build/
+*.pdn
