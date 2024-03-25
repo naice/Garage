@@ -15,19 +15,16 @@ const char* password = STAPSK;
 ESP8266WebServer server(80);
 
 // Pins
-  // BuiltIn LED
-  const int ledPin = LED_BUILTIN;
   // Relay
-    const int relayPin = 5;
-  // Reed Garage Closed
-    const int garageClosedPin = 13;
-    const int garageOpenedPin = 15;
+  const int relayPin = 5;
+  // Reed Sensors
+  const int garageClosedPin = 13;
+  const int garageOpenedPin = 15;
 
 int garageClosed = 0;
 int garageOpened = 0;
 
 void handleNotFound() {
-  digitalWrite(ledPin, 0);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -38,17 +35,14 @@ void handleNotFound() {
   message += "\n";
   for (uint8_t i = 0; i < server.args(); i++) { message += " " + server.argName(i) + ": " + server.arg(i) + "\n"; }
   server.send(404, "text/plain", message);
-  digitalWrite(ledPin, 1);
 }
 
 void handleRoot() {
-  digitalWrite(ledPin, 0);
   String result = String("{");
   result += "\"garageClosed\":" + String(garageClosed) + ",";
   result += "\"garageOpened\":" + String(garageOpened);
   result += "}";
   server.send(200, "application/json", result.c_str());
-  digitalWrite(ledPin, 1);
 }
 
 void handleRelay() {
@@ -73,11 +67,9 @@ void handleRelay() {
 }
 
 void setup() {
-  pinMode(ledPin, OUTPUT);
   pinMode(relayPin, OUTPUT);
   pinMode(garageClosedPin, INPUT);
   pinMode(garageOpenedPin, INPUT);
-  digitalWrite(ledPin, LOW);
   digitalWrite(relayPin, HIGH);
   
   Serial.begin(115200);
@@ -111,7 +103,6 @@ void setup() {
 
   server.begin();
   Serial.println("HTTP server started");
-  digitalWrite(ledPin, HIGH);
 }
 
 void loop() {  

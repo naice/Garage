@@ -39,7 +39,7 @@ Configure your pins according to your wiring for the relay and the two reed sens
 ```c++
   // Relay
   const int relayPin = 5;
-  // Reed Garage Closed
+  // Reed Sensors
   const int garageClosedPin = 13;
   const int garageOpenedPin = 15;
 ```
