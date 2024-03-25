@@ -56,7 +56,7 @@ type GarageDoorConfig = {
 
 export class GarageDoorAccessory implements AccessoryPlugin {
   private http: AxiosInstance;
-  private timer?: NodeJS.Timer;
+  private timer?: NodeJS.Timeout;
   private timerLaunch = 0;
   private toggleUrl: string;
   private service: Service;
@@ -131,38 +131,40 @@ export class GarageDoorAccessory implements AccessoryPlugin {
   }
 
   startStateTimer(): void {
-    const { config, state, log } = this;
+    const { config } = this;
     if (this.timer !== undefined) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
     }
     this.timerLaunch = new Date().getTime();
-    this.timer = setInterval(async () => {
-      const now = new Date().getTime();
-      const runtimeInSeconds = (now - this.timerLaunch) / 1000;
-      if (runtimeInSeconds > config.maximumDurationInSeconds) {
-        log.debug(
-          `Target state not reached yet, aborting. Target: ${this.getStateLog(state.targetDoorState)}, ` +
-          `Current: ${this.getStateLog(state.targetDoorState)}`);
-        clearInterval(this.timer);
-        return;
-      }
+    this.timer = setTimeout(() => this.timeout(), config.refreshTimeoutInSeconds * 1000);
+  }
 
-      try {
-        await this.onGet();
-      } catch (error) {
-        log.debug('Timer state update failed.', error);
-      }
-
-      if (state.currentDoorState === state.targetDoorState) {
-        log.debug(
-          `Target state reached. ${this.getStateLog(state.targetDoorState)}`);
-        clearInterval(this.timer);
-        return;
-      }
+  async timeout() {
+    const { config, state, log } = this;
+    const now = new Date().getTime();
+    const runtimeInSeconds = (now - this.timerLaunch) / 1000;
+    if (runtimeInSeconds > config.maximumDurationInSeconds) {
       log.debug(
-        `Target state not reached yet. Target: ${this.getStateLog(state.targetDoorState)}, ` +
+        `Target state not reached yet, aborting. Target: ${this.getStateLog(state.targetDoorState)}, ` +
         `Current: ${this.getStateLog(state.targetDoorState)}`);
-    }, config.refreshTimeoutInSeconds * 1000);
+      return;
+    }
+
+    try {
+      await this.onGet();
+    } catch (error) {
+      log.debug('Timer state update failed.', error);
+    }
+
+    if (state.currentDoorState === state.targetDoorState) {
+      log.debug(
+        `Target state reached. ${this.getStateLog(state.targetDoorState)}`);
+      return;
+    }
+    log.debug(
+      `Target state not reached yet. Target: ${this.getStateLog(state.targetDoorState)}, ` +
+      `Current: ${this.getStateLog(state.targetDoorState)}`);
+    this.timer = setTimeout(() => this.timeout(), config.refreshTimeoutInSeconds * 1000);
   }
 
   async onGet(): Promise<CharacteristicValue> {
